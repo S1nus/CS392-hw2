@@ -2,6 +2,7 @@
 #include <stdio.h>
 #include <sys/types.h>
 #include <sys/stat.h>
+#include <string.h>
 
 float generateNum() {
 	float a = 200;
@@ -21,8 +22,8 @@ void generateNnumbers(int n) {
 	fclose(nnumbers);
 }
 
-void readAndPrintFloats() {
-	FILE *toRead = fopen("temp/nnumbers", "r");
+void readAndPrintFloats(char* filename) {
+	FILE *toRead = fopen(filename, "r");
 
 	while (!feof(toRead)) {
 		float f;
@@ -66,8 +67,35 @@ void mergesort(FILE* nums) {
 	}
 	highIndex--;
 
-	char* fileName = (char*)calloc(30, sizeof(char));
-	int aFilenameSize = sprintf(fileName, "array-%d-%d.dat", lowIndex, highIndex);
+	int middle = lowIndex + (highIndex - lowIndex)/2;
+
+	char* fileNameA = (char*)calloc(30, sizeof(char));
+	int aFilenameSize = sprintf(fileNameA, "temp/array-%d-%d.dat", lowIndex, middle);
+	fileNameA = realloc(fileNameA, aFilenameSize);
+	char* fileNameB = (char*)calloc(30, sizeof(char));
+	int bFilenameSize = sprintf(fileNameB, "temp/array-%d-%d.dat", middle+1, highIndex);
+	fileNameB = realloc(fileNameB, bFilenameSize);
+
+	FILE* fileA = fopen(fileNameA, "wb");
+	FILE* fileB = fopen(fileNameB, "wb");
+
+	//readAndPrintFloats("temp/nnumbers");
+	rewind(nums);
+	for (int i = 0; i < middle; i++) {
+		float f;
+		fread(&f, sizeof(float), 1, nums); 
+		fwrite(&f, sizeof(float), 1, fileA);
+	}
+	for (int i = middle; i<highIndex; i++) {
+		float f;
+		fread(&f, sizeof(float), 1, nums);
+		fwrite(&f, sizeof(float), 1, fileB);
+	}
+
+	fclose(fileA);
+	fclose(fileB);
+	free(fileNameA);
+	free(fileNameB);
 }
 
 int main(int argc, char** argv) {
